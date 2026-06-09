@@ -1,0 +1,7 @@
+feature,value,feature_value,event_rate,count,lift
+area,2.0,area=2.0,0.3611111111111111,36,6.871004566210045
+spot_distribution,C,spot_distribution=C,0.35185185185185186,54,6.69482496194825
+previous_flare_activity,3.0,previous_flare_activity=3.0,0.26785714285714285,56,5.096624266144814
+largest_spot_size,K,largest_spot_size=K,0.2553191489361702,94,4.858058874963567
+zurich_class,E,zurich_class=E,0.15517241379310345,116,2.9525271610769956
+largest_spot_area,2.0,largest_spot_area=2.0,0.13524590163934427,244,2.5733774983157423
