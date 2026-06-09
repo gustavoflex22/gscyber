@@ -1,0 +1,73 @@
+name: Security Scan
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      simulate_failure:
+        description: "Create a vulnerable fixture so Trivy blocks on HIGH/CRITICAL findings"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+permissions:
+  contents: read
+
+jobs:
+  trivy-vulnerability-scan:
+    name: Trivy Vulnerability Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare vulnerable fixture for failure simulation
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.simulate_failure == 'true' }}
+        run: |
+          mkdir -p .trivy-failure-fixture
+          cat > .trivy-failure-fixture/package-lock.json <<'JSON'
+          {
+            "name": "trivy-failure-fixture",
+            "lockfileVersion": 3,
+            "requires": true,
+            "packages": {
+              "": {
+                "dependencies": {
+                  "lodash": "4.17.11"
+                }
+              },
+              "node_modules/lodash": {
+                "version": "4.17.11",
+                "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.11.tgz",
+                "integrity": "sha512-cQKh8tz3HWx22HH3F1rQZpE5tEfeVJxQXWHRXfJE1aOaF1RSbjn8ZVTJUpqaDRqPZm2DiTa6TyWCYJgGfhwNwA=="
+              }
+            },
+            "dependencies": {
+              "lodash": {
+                "version": "4.17.11",
+                "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.11.tgz",
+                "integrity": "sha512-cQKh8tz3HWx22HH3F1rQZpE5tEfeVJxQXWHRXfJE1aOaF1RSbjn8ZVTJUpqaDRqPZm2DiTa6TyWCYJgGfhwNwA=="
+              }
+            }
+          }
+          JSON
+
+      - name: Trivy Vulnerability Scan
+        uses: aquasecurity/trivy-action@0.31.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: table
+          severity: HIGH,CRITICAL
+          vuln-type: os,library
+          ignore-unfixed: true
+          exit-code: "1"
